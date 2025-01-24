@@ -10,3 +10,6 @@ sources:
 
     - name: googleads_campaign_performance
       identifier: healthybaby_googleads_campaign_performance
+      
+    - name: ga4_performance_by_campaign
+      identifier: healthybaby_ga4_performance_by_campaign
