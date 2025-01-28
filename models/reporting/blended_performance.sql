@@ -31,7 +31,7 @@ WITH blended_data as
             0 as spend, 0 as clicks, 0 as impressions, 0 as paid_purchases, 0 as paid_revenue,
             orders as sho_purchases, first_orders as sho_ft_purchases, total_net_sales as sho_revenue, first_order_total_net_sales as sho_ft_revenue,
             0 as sessions, 0 as engaged_sessions, 0 as ga4_purchases, 0 as ga4_revenue
-        FROM {{ source('reporting','ga4_performance_by_campaign') }}
+        FROM {{ source('reporting','shopify_sales') }}
         )
     GROUP BY channel, date, date_granularity)
     
