@@ -13,3 +13,6 @@ sources:
       
     - name: ga4_performance_by_campaign
       identifier: healthybaby_ga4_performance_by_campaign
+      
+    - name: shopify_sales
+      identifier: healthybaby_shopify_sales
