@@ -5,8 +5,8 @@
 WITH blended_data as
     (SELECT channel, date::date, date_granularity, COALESCE(SUM(spend),0) as spend, COALESCE(SUM(clicks),0) as clicks, COALESCE(SUM(impressions),0) as impressions, 
         COALESCE(SUM(paid_purchases),0) as paid_purchases, COALESCE(SUM(paid_revenue),0) as paid_revenue, 
-        0 as sho_purchases, 0 as sho_ft_purchases, 0 as sho_revenue, 0 as sho_ft_revenue,
-        0 as sessions, 0 as engaged_sessions, 0 as ga4_purchases, 0 as ga4_revenue
+        COALESCE(SUM(sho_purchases),0) as sho_purchases, COALESCE(SUM(sho_ft_purchases),0) as sho_ft_purchases, COALESCE(SUM(sho_revenue),0) as sho_revenue, COALESCE(SUM(sho_ft_revenue),0) as sho_ft_revenue,
+        COALESCE(SUM(sessions),0) as sessions, COALESCE(SUM(engaged_sessions),0) as engaged_sessions, COALESCE(SUM(ga4_purchases),0) as ga4_purchases, COALESCE(SUM(ga4_revenue),0) as ga4_revenue
     FROM
         (SELECT 'Meta' as channel, date, date_granularity, 
             spend, link_clicks as clicks, impressions, purchases as paid_purchases, revenue as paid_revenue,
