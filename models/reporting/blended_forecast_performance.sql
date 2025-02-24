@@ -19,10 +19,10 @@ initial_forecast_data as
 ga4_data as
 ({%- for date_granularity in date_granularity_list %}  
   SELECT '{{date_granularity}}' as date_granularity, {{date_granularity}} as date,
-    first_user_source_medium as source_medium, 
+    first_user_source_medium::varchar as source_medium, first_user_campaign_name::varchar as campaign_name,
     COALESCE(SUM(conversions_purchase),0) as ga4_purchases, COALESCE(SUM(purchase_revenue),0) as ga4_revenue
   FROM initial_ga4_data
-  GROUP BY 1,2,3
+  GROUP BY 1,2,3,4
   {% if not loop.last %}UNION ALL
   {% endif %}
 {% endfor %}),
@@ -39,43 +39,43 @@ sho_data as
 {% endfor %}),
   
 actual_data as
-    (SELECT 'Actual' as type, channel, date::date, date_granularity, COALESCE(SUM(spend),0) as spend, 
+    (SELECT 'Actual' as type, channel, date, date_granularity, campaign_name, COALESCE(SUM(spend),0) as spend, 
         COALESCE(SUM(paid_purchases),0) as paid_purchases, COALESCE(SUM(paid_revenue),0) as paid_revenue, 
         COALESCE(SUM(sho_purchases),0) as sho_purchases, COALESCE(SUM(sho_ft_purchases),0) as sho_ft_purchases, 
         COALESCE(SUM(ga4_purchases),0) as ga4_purchases, COALESCE(SUM(ga4_revenue),0) as ga4_revenue
     FROM
-        (SELECT 'Meta' as channel, date, date_granularity, 
+        (SELECT 'Meta' as channel, date::date, date_granularity, campaign_name::varchar,
             spend, purchases as paid_purchases, revenue as paid_revenue,
             0 as sho_purchases, 0 as sho_ft_purchases,
             0 as ga4_purchases, 0 as ga4_revenue
         FROM {{ source('reporting','facebook_ad_performance') }}
         UNION ALL
-        SELECT 'Google Ads' as channel, date, date_granularity,
+        SELECT 'Google Ads' as channel, date::date, date_granularity, campaign_name::varchar,
             spend, purchases as paid_purchases, revenue as paid_revenue,
             0 as sho_purchases, 0 as sho_ft_purchases, 
             0 as ga4_purchases, 0 as ga4_revenue
         FROM {{ source('reporting','googleads_campaign_performance') }}
         UNION ALL
-        SELECT 'Meta' as channel, date, date_granularity,
+        SELECT 'Meta' as channel, date::date, date_granularity, campaign_name::varchar,
             0 as spend, 0 as paid_purchases, 0 as paid_revenue,
             0 as sho_purchases, 0 as sho_ft_purchases, 
             ga4_purchases, ga4_revenue
         FROM ga4_data
         WHERE source_medium = 'Facebook / paidsocial'
         UNION ALL
-        SELECT 'Google Ads' as channel, date, date_granularity,
+        SELECT 'Google Ads' as channel, date::date, date_granularity, campaign_name::varchar,
             0 as spend, 0 as paid_purchases, 0 as paid_revenue,
             0 as sho_purchases, 0 as sho_ft_purchases, 
             ga4_purchases, ga4_revenue
         FROM ga4_data
         WHERE source_medium = 'google / cpc'
         UNION ALL
-        SELECT 'Shopify' as channel, date, date_granularity,
+        SELECT 'Shopify' as channel, date::date, date_granularity, null as campaign_name,
             0 as spend, 0 as paid_purchases, 0 as paid_revenue,
             sho_purchases, sho_ft_purchases, 
             0 as ga4_purchases, 0 as ga4_revenue
         FROM sho_data)
-    GROUP BY 1,2,3,4),
+    GROUP BY 1,2,3,4,5),
     
 dg_forecast_data as
 ({%- for date_granularity in date_granularity_list %}  
@@ -88,23 +88,23 @@ dg_forecast_data as
 {% endfor %}),
 
 forecast_data as 
-    (SELECT 'Forecast' as type, channel, date, date_granularity,
+    (SELECT 'Forecast' as type, channel, date::date, date_granularity, null as campaign_name,
         COALESCE(SUM(spend),0) as spend, 0 as paid_purchases, 0 as paid_revenue,
         0 as sho_purchases, COALESCE(SUM(sho_ft_purchases),0) as sho_ft_purchases, 
         0 as ga4_purchases, 0 as ga4_revenue
     FROM
-        (SELECT 'Meta' as channel, date, date_granularity, COALESCE(SUM(facebook_spend),0) as spend, 0 as sho_ft_purchases
+        (SELECT 'Meta' as channel, date::date, date_granularity, COALESCE(SUM(facebook_spend),0) as spend, 0 as sho_ft_purchases
         FROM dg_forecast_data
         GROUP BY 1,2,3
         UNION ALL 
-        SELECT 'Google Ads' as channel, date, date_granularity, COALESCE(SUM(google_spend),0) as spend, 0 as sho_ft_purchases
+        SELECT 'Google Ads' as channel, date::date, date_granularity, COALESCE(SUM(google_spend),0) as spend, 0 as sho_ft_purchases
         FROM dg_forecast_data
         GROUP BY 1,2,3
         UNION ALL 
-        SELECT 'Shopify' as channel, date, date_granularity, 0 as spend, COALESCE(SUM(new_customer_purchases),0) as sho_ft_purchases
+        SELECT 'Shopify' as channel, date::date, date_granularity, 0 as spend, COALESCE(SUM(new_customer_purchases),0) as sho_ft_purchases
         FROM dg_forecast_data
         GROUP BY 1,2,3)
-    GROUP BY 1,2,3,4),
+    GROUP BY 1,2,3,4,5),
     
 joined_data as
     (SELECT * FROM actual_data
@@ -115,6 +115,7 @@ SELECT type,
     channel,
     date,
     date_granularity,
+    campaign_name,
     spend,
     paid_purchases,
     paid_revenue,
