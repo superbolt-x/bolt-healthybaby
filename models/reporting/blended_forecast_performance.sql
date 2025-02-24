@@ -78,7 +78,7 @@ actual_data as
     GROUP BY 1,2,3,4),
     
 dg_forecast_data as
-(({%- for date_granularity in date_granularity_list %}  
+({%- for date_granularity in date_granularity_list %}  
     SELECT '{{date_granularity}}' as date_granularity, {{date_granularity}} as date,
         COALESCE(SUM(facebook_spend),0) as facebook_spend, COALESCE(SUM(google_spend),0) as google_spend, COALESCE(SUM(new_customer_purchases),0) as new_customer_purchases
     FROM initial_forecast_data
