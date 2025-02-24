@@ -5,7 +5,7 @@
 {% set date_granularity_list = ['day', 'week', 'month', 'quarter', 'year'] %}
   
 WITH initial_ga4_data as
-  (SELECT *, {{ get_date_parts('date') }} 
+  (SELECT *, date::date as date, {{ get_date_parts('date') }} 
   FROM {{ source('ga4_raw','granular_ecomm_salesperformance') }} ),
 
 initial_sho_data as
@@ -13,7 +13,7 @@ initial_sho_data as
   FROM {{ source('shopify_base','shopify_orders') }} ),
 
 initial_forecast_data as
-  (SELECT *, {{ get_date_parts('date') }} 
+  (SELECT *, date::date as date, {{ get_date_parts('date') }} 
   FROM {{ source('gsheet_raw','forecast_data') }} ),
   
 ga4_data as
