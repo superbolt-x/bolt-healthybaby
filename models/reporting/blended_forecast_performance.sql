@@ -9,7 +9,7 @@ WITH initial_ga4_data as
   FROM {{ source('ga4_raw','granular_ecomm_salesperformance') }} ),
 
 initial_sho_data as
-  (SELECT *, order_date::date as date, {{ get_date_parts('date') }} 
+  (SELECT *, order_date::date as date
   FROM {{ source('shopify_base','shopify_orders') }} ),
 
 initial_forecast_data as
