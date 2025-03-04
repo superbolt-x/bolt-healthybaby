@@ -37,4 +37,6 @@ sources:
   tables:
     - name: forecast_data
       identifier: forecast_data
+    - name: actual_data
+      identifier: actual_data
 
