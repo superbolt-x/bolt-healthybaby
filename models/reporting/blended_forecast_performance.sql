@@ -15,6 +15,10 @@ initial_sho_data as
 initial_forecast_data as
   (SELECT *, {{ get_date_parts('date') }} 
   FROM {{ source('gsheet_raw','forecast_data') }} ),
+
+initial_ft_data as
+  (SELECT *, {{ get_date_parts('date') }} 
+  FROM {{ source('gsheet_raw','actual_data') }} ),
   
 ga4_data as
 ({%- for date_granularity in date_granularity_list %}  
@@ -30,9 +34,19 @@ ga4_data as
 sho_data as
 ({%- for date_granularity in date_granularity_list %} 
   SELECT '{{date_granularity}}' as date_granularity, {{date_granularity}} as date,
-    COUNT(DISTINCT order_id) as sho_purchases, COUNT(DISTINCT CASE WHEN customer_order_index = 1 THEN order_id END) as sho_ft_purchases
+    COUNT(DISTINCT order_id) as sho_purchases, 0 as sho_ft_purchases
   FROM initial_sho_data
   WHERE cancelled_at IS NULL AND email !='' AND total_revenue >= 0.01 
+  GROUP BY 1,2
+  {% if not loop.last %}UNION ALL
+  {% endif %}
+{% endfor %}),
+
+ft_data as
+({%- for date_granularity in date_granularity_list %} 
+  SELECT '{{date_granularity}}' as date_granularity, {{date_granularity}} as date,
+    new_customer_purchases as sho_ft_purchases
+  FROM initial_ft_data
   GROUP BY 1,2
   {% if not loop.last %}UNION ALL
   {% endif %}
@@ -72,9 +86,15 @@ actual_data as
         UNION ALL
         SELECT 'Shopify' as channel, date::date, date_granularity, null as campaign_name,
             0 as spend, 0 as paid_purchases, 0 as paid_revenue,
-            sho_purchases, sho_ft_purchases, 
+            sho_purchases, 0 as sho_ft_purchases, 
             0 as ga4_purchases, 0 as ga4_revenue
-        FROM sho_data)
+        FROM sho_data
+        UNION ALL
+        SELECT 'Shopify' as channel, date::date, date_granularity, null as campaign_name,
+            0 as spend, 0 as paid_purchases, 0 as paid_revenue,
+            0 as sho_purchases, sho_ft_purchases, 
+            0 as ga4_purchases, 0 as ga4_revenue
+        FROM ft_data)
     GROUP BY 1,2,3,4,5),
     
 dg_forecast_data as
