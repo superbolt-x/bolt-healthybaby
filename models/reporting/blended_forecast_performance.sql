@@ -34,7 +34,7 @@ ga4_data as
 sho_data as
 ({%- for date_granularity in date_granularity_list %} 
   SELECT '{{date_granularity}}' as date_granularity, {{date_granularity}} as date,
-    COUNT(DISTINCT order_id) as sho_purchases, 0 as sho_ft_purchases
+    COUNT(DISTINCT order_id) as sho_purchases
   FROM initial_sho_data
   WHERE cancelled_at IS NULL AND email !='' AND total_revenue >= 0.01 
   GROUP BY 1,2
