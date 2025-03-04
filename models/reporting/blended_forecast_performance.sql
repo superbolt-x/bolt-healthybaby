@@ -45,7 +45,7 @@ sho_data as
 ft_data as
 ({%- for date_granularity in date_granularity_list %} 
   SELECT '{{date_granularity}}' as date_granularity, {{date_granularity}} as date,
-    new_customer_purchases as sho_ft_purchases
+    COALESCE(SUM(new_customer_purchases),0) as sho_ft_purchases
   FROM initial_ft_data
   GROUP BY 1,2
   {% if not loop.last %}UNION ALL
