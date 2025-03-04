@@ -144,3 +144,4 @@ SELECT type,
     ga4_purchases, 
     ga4_revenue
 FROM joined_data
+WHERE date < current_date
