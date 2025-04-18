@@ -20,6 +20,12 @@ WITH blended_data as
             0 as sessions, 0 as engaged_sessions, 0 as ga4_purchases, 0 as ga4_revenue
         FROM {{ source('reporting','googleads_campaign_performance') }}
         UNION ALL
+        SELECT 'TikTok' as channel, date, date_granularity,
+            campaign_name, spend, clicks, impressions, purchases as paid_purchases, revenue as paid_revenue,
+            0 as sho_purchases, 0 as sho_ft_purchases, 0 as sho_revenue, 0 as sho_ft_revenue,
+            0 as sessions, 0 as engaged_sessions, 0 as ga4_purchases, 0 as ga4_revenue
+        FROM {{ source('reporting','tiktok_ad_performance') }}
+        UNION ALL
         SELECT 'GA4' as channel, date, date_granularity,
             campaign_name, 0 as spend, 0 as clicks, 0 as impressions, 0 as paid_purchases, 0 as paid_revenue,
             0 as sho_purchases, 0 as sho_ft_purchases, 0 as sho_revenue, 0 as sho_ft_revenue,
