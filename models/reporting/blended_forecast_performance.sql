@@ -70,6 +70,12 @@ actual_data as
             0 as ga4_purchases, 0 as ga4_revenue
         FROM {{ source('reporting','googleads_campaign_performance') }}
         UNION ALL
+        SELECT 'TikTok' as channel, date::date, date_granularity, campaign_name::varchar,
+            spend, purchases as paid_purchases, revenue as paid_revenue,
+            0 as sho_purchases, 0 as sho_ft_purchases, 
+            0 as ga4_purchases, 0 as ga4_revenue
+        FROM {{ source('reporting','tiktok_ad_performance') }}
+        UNION ALL
         SELECT 'Meta' as channel, date::date, date_granularity, campaign_name::varchar,
             0 as spend, 0 as paid_purchases, 0 as paid_revenue,
             0 as sho_purchases, 0 as sho_ft_purchases, 
