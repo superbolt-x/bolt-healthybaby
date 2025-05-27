@@ -84,6 +84,13 @@ actual_data as
         FROM ga4_data
         WHERE source_medium = 'google / cpc'
         UNION ALL
+        SELECT 'TikTok' as channel, date::date, date_granularity, campaign_name::varchar,
+            0 as spend, 0 as paid_purchases, 0 as paid_revenue,
+            0 as sho_purchases, 0 as sho_ft_purchases, 
+            ga4_purchases, ga4_revenue
+        FROM ga4_data
+        WHERE source_medium = 'tiktok / paid_social'
+        UNION ALL
         SELECT 'Shopify' as channel, date::date, date_granularity, null as campaign_name,
             0 as spend, 0 as paid_purchases, 0 as paid_revenue,
             sho_purchases, 0 as sho_ft_purchases, 
@@ -118,6 +125,10 @@ forecast_data as
         GROUP BY 1,2,3
         UNION ALL 
         SELECT 'Google Ads' as channel, date::date, date_granularity, COALESCE(SUM(google_spend),0) as spend, 0 as sho_ft_purchases
+        FROM dg_forecast_data
+        GROUP BY 1,2,3
+        UNION ALL 
+        SELECT 'TikTok' as channel, date::date, date_granularity, COALESCE(SUM(google_spend),0) as spend, 0 as sho_ft_purchases
         FROM dg_forecast_data
         GROUP BY 1,2,3
         UNION ALL 
