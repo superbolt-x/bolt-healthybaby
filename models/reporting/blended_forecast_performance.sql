@@ -113,7 +113,7 @@ actual_data as
 dg_forecast_data as
 ({%- for date_granularity in date_granularity_list %}  
     SELECT '{{date_granularity}}' as date_granularity, {{date_granularity}} as date,
-        COALESCE(SUM(facebook_spend),0) as facebook_spend, COALESCE(SUM(google_spend),0) as google_spend, COALESCE(SUM(new_customer_purchases),0) as new_customer_purchases
+        COALESCE(SUM(facebook_spend),0) as facebook_spend, COALESCE(SUM(google_spend),0) as google_spend, COALESCE(SUM(tiktok_spend),0) as tiktok_spend, COALESCE(SUM(new_customer_purchases),0) as new_customer_purchases
     FROM initial_forecast_data
     GROUP BY 1,2
     {% if not loop.last %}UNION ALL
