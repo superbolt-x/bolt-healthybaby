@@ -134,7 +134,7 @@ forecast_data as
         FROM dg_forecast_data
         GROUP BY 1,2,3
         UNION ALL 
-        SELECT 'TikTok' as channel, date::date, date_granularity, COALESCE(SUM(google_spend),0) as spend, 0 as sho_ft_purchases
+        SELECT 'TikTok' as channel, date::date, date_granularity, COALESCE(SUM(tiktok_spend),0) as spend, 0 as sho_ft_purchases
         FROM dg_forecast_data
         GROUP BY 1,2,3
         UNION ALL 
